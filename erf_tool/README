@@ -1,0 +1,81 @@
+Neverwinter Nights ERF Utility
+Version: 1.2
+
+Copyright (C) 2003, Gareth Hughes <roboius@dladventures.net>
+
+Additions and fixes by meaglyn <meaglyn.nwn@gmail.com>  Copyright 2014.
+
+The updated version has not been built or tested on windows. It supports
+linux only (possibly other Unix variants). 
+
+To build: 
+   Ensure you have gcc and basic c development packages installed.
+
+   	  cd src
+   	  make
+
+    Resulting binary is erf-1.2/src/erf. The update.sh script will
+    find it there if you leave it in place.
+
+
+Changes: 
+	 Add support for quoted input file names to handle spaces.
+	 Fix compile issues.
+	 
+
+
+
+Original README contents:
+
+
+The Neverwinter Nights Encapsulated Resource Format (ERF) Utility 'erf'
+is a command line tool that acts very much like the standard UNIX 'tar'
+command, and even shares many of the same command line options.  It
+interacts with the various NWN ERF files, such as ERF (.erf), HAK
+(.hak), module (.mod and .nwm) and saved game (.sav) files.
+
+Currently, 'erf' can create, extract and list the contents of ERF
+files.  Future versions will be able to merge/update files and ERFs into
+existing ERFs, just like you can do in the toolset but without all the
+overhead that comes with it.
+
+For information on exactly how to use 'erf', just run 'erf --help' from
+the command line.
+
+This utility works very well when combined with other command line
+tools for Neverwinter Nights, such as Torlack's MDL and script
+compilers.  These are available at http://www.torlack.com, and I highly
+recommend them.  I use 'erf' in conjunction with Torlack's script
+compiler to create and edit scripts using Emacs, bash and GNU make.  A
+simple Makefile will allow you to compile your scripts and build a HAK
+out of them.  Future versions of 'erf' will allow you to merge files or
+ERFs into pre-existing ERFs, such as a HAK or game module.
+
+Why did I create this utility?  Because I really hate the script editor
+in the NWN toolset, and I'm a UNIX hacker -- I like editing in Emacs, I
+like typing 'make install' in a shell, and so on.
+
+Changes in version 1.1
+======================
+
+  - Add basic merge support (individual files only, no ERFs).
+  - Better error checking in various places.
+
+Changes in version 1.0.2
+========================
+
+  - Renamed error() to fatal_error() to better reflect what this
+    function is used for.
+  - Use fputs() instead of printf() for constant strings.
+  - Made compare_resources() a static function.
+  - Fix command line argument wildcards on Windows by linking with
+    'setargv.obj'.
+  - General restructuring to support ERF merging, coming soon.
+  - Output more information to stderr, particularly when files are
+    skipped.
+
+Changes in version 1.0.1
+========================
+
+  - Added README file.
+  - Fixed my email address.

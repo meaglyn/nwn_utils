@@ -1,0 +1,6 @@
+#TLS V1.0 Uncompiled TLK source#
+<0><16777216>:Bad Strref
+<216777218>:This is line 2
+<4><16777220>:this is a >: mult-line
+tlk entry with newlines and "quotes"
+<6><16777222>:more text here

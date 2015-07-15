@@ -1,0 +1,30 @@
+Installing nwntlkcomp
+
+The release includes a 32bit lunix binary compiled against glibc6. This 
+may work on your Linux system. If so you can just copy nwntlkcomp to 
+somewhere in your path (/usr/local/bin or ~/bin/ for example).
+
+If this does not run you can build it yourself. Make sure you have the 
+development libraries and tools installed. The tool only requires glibc, 
+it does not use other libraries. You also need the make utility.
+
+On a 64bit system you will need to install the 32it gcc and glibc development
+packages since the makefile tries to build a 32 bit version by default.
+If you want to build a native 64bit version simply comment out the line
+   ARCH=-m32  
+in makefile. 
+
+To compile just run make.  And then copy the resulting binary as above.
+
+There are a few tls files included in tests/  which can be used for 
+validation. 
+
+cd tests
+#convert the cep tls file to a tlk
+../nwntlkcomp -o t.tlk cep23_v1.tls
+#convert it back to tls 
+../nwntlkcomp -o t.tls t.tlk
+# compare to make sure they are the same
+diff t.tls cep23_v1.tls
+# should be no output here...
+

@@ -1,0 +1,71 @@
+Tlkfile compiler  nwntlkcomp   verion 1.0
+by Meaglyn (meaglyn.nwn@gmail.com)
+Copyright 2014.
+
+This program is releases under the GPL v2.0
+
+
+This program is used to translate uncompiled talk table files (called tls 
+files and using the .tls extension) to and from Bioware's TLK 
+file format as used in NWN 1 (.tlk extension). It can also be used to 
+output the same format as the input which is useful for testing and
+to update the user entries in the tls format file. 
+
+The purpose is to store the tlk file in a text format for easy versioning
+and editting. It can also be used with spellchecking and grep and other
+text based tools. 
+
+The TLK format is defined in Bioware_Aurora_TalkTable_Format.pdf. 
+It is a binary format with fixed length headers for each entry followed by 
+free-form data for each string. 
+
+The TLS format is specific to this program. A TLS file starts with a header 
+line which must be  "#TLS V1.0 Uncompiled TLK source#" (no quotes and with 
+a newline directly following the last #. The header is followed buy the 
+non-empty text entries. Only the non-empty ones are needed.
+
+Each entry is two integers surrounded by <> and a colon, followed by text.
+
+<0><0>:Bad Strref
+<2><0>:This is line 2
+
+The first number is the entry number in this file. Each must be unique and 
+they should be in order. They do not have to be consecutive. The second
+number is the value as used in 2da files and scripts to reference that line.
+In user TLK files that is 16,777,216 + line number. In the main dialog.tlk file
+that is the same as the line number.  This may be left as 0 in tls files. 
+when a tls file is written out the compiler will fix these numbers. So when 
+adding new lines it is not necessary to manually enter them. Just set to zero 
+and run the compiler on the file.  The second number is purely a helper for 
+the user. It has no effect on the resulting TLK file.
+
+Multiple line text is allowed and is done simply by having the following lines
+begin on the lines following the entry:
+
+<4><0>:this is a mult-line
+tlk entry with newlines and "quotes"
+<5><0>:This is entry 5
+
+When creating a TLK file from tls input the TLK file is automatically padded
+to fill in any gaps in the entry nubmers.
+
+Usage: 
+       nwntlkcomp [-dnv] [-i <fmt>] [-f <fmt] -o <outfile> <infile>
+       
+       Where outfile is named with an appropriate extension. Infile 
+       type will be detected if possible.
+
+       -i <fmt> : specify the format of the input file ("tlk" or "tls")
+             Will error if file is not of specificied format.
+
+       -f <fmt> : specify the format of the output file ("tlk" or "tls")
+             Will produce output file in given format regardless of 
+	     outfile's extension.
+
+	-n: Do not use high numbers for translating the user entry number.
+	This produces <1><1>: entry instead of <1><16,777,217:entry. This is 
+	useful for decompiling dialog.tlk.
+
+	-v: enable a bit mor everbose output, number of entries etc.
+
+	-d: enable debug output, lots of data you probably don't care about.
