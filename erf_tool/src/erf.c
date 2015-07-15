@@ -3,6 +3,9 @@
  * Version: 1.1
  *
  * Copyright (C) 2003, Gareth Hughes <roboius@dladventures.net>
+ * Version: 1.2
+ *
+ * Copyright (C) 2014, Meaglyn <meaglyn.nwn@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -30,9 +33,9 @@
 
 #include "erf.h"
 
-#define ERF_VERSION     "1.1"
-#define ERF_AUTHOR      "Gareth Hughes <roboius@dladventures.net>"
-#define ERF_COPYRIGHT   "Copyright (C) 2003, Gareth Hughes."
+#define ERF_VERSION     "1.2"
+#define ERF_AUTHOR      "Meaglyn <meaglyn.nwn@gmail.com>"
+#define ERF_COPYRIGHT   "Copyright (C) 2003, Gareth Hughes. Bugfixes and enhancements: Copyright (C) 2014 Meaglyn"
 
 #ifndef BYTE_ORDER
 #define LITTLE_ENDIAN   1234
@@ -476,7 +479,7 @@ static struct erf_resource_list *load_files(char **files, int num_files)
         fclose(file);
 
         if (verbose) {
-            printf("%s\n", files[ii]);
+            printf("Loaded file %s\n", files[ii]);
         }
 
         get_base_name(res->key.name, files[ii]);
@@ -495,6 +498,7 @@ static struct erf_resource_list *load_files(char **files, int num_files)
     }
 
     list->entry_count = count;
+    //printf("Loaded %d files\n", count);
 
     return list;
 }
@@ -511,6 +515,7 @@ static struct erf_resource_list *build_resource_list(char **files, u32 num_files
 
     last = 0;
 
+    //printf("build_resource_list called with num_files = %d\n", num_files);
     while (last < num_files) {
         /* Scan the file list to see if we should read in individual
          * files, or if we have to extract resources from an ERF file.
@@ -772,6 +777,8 @@ static void erf_create(struct erf *erf)
     u32 count = erf->header.entry_count;
     u32 ii;
 
+    //printf("erf_Create called with count %d\n", count);
+
     /* Create the output file.
      */
     file = fopen(erf->name, "wb");
@@ -797,10 +804,14 @@ static void erf_create(struct erf *erf)
     for (ii = 0; ii < count; ii++) {
         struct erf_resource *res = erf->resources[ii];
 
+	//printf("writing out file %s (%d)\n",  res->key.name, ii);
+
         if (fwrite(res->buffer, res->data.length, 1, file) < 1) {
 		if (ferror(file)) {
             fatal_error("short write on ERF data for file '%.16s%s'",
                         res->key.name, get_extension_from_type(res->key.type));
+		} else {
+			printf("Write returned < 1 byte for %s (should be %d)\n", res->key.name, res->data.length);
 		}
         }
     }
@@ -983,6 +994,7 @@ int main(int argc, char *argv[])
         fatal_error("no input files");
     }
     
+    //printf("erf called %s num files %d\n", erf.name, num_files);
     
 
 

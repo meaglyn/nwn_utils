@@ -23,7 +23,9 @@ int tlkoutoforder = 0;
 int tlkquiet = 0;
 int tlkrenumber = 0;
 
-char * tlkcomp_version = "tlkcompiler 1.0";
+char * tlkcomp_name = "nwntlkcomp";
+char * tlkcomp_version = "1.1";
+char * tlkcomp_contact = "Meaglyn <dluarp@gmail.com>";
 
 tlkformat_t * tlk_lookup_format(char * name) {
 	tlkformat_t * ret = NULL;
@@ -33,8 +35,6 @@ tlkformat_t * tlk_lookup_format(char * name) {
 		if (!strcmp(formats[i]->name, name))
 			return formats[i];
 	}
-
-
 	return ret;
 }
 

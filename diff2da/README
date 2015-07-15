@@ -1,0 +1,93 @@
+2DA diffing tool.
+
+This little utility is a perl script to manage 2da files. 
+It requires the Number/Range perl package which can be found 
+at http://search.cpan.org/~larrysh/Number-Range-0.10/lib/Number/Range.pm
+
+If /usr/bin/perl is not where your perl lives you will want to edit to 
+first line of the script.
+
+There are currently 2 basic modes of operation.
+
+1) Fix/validate/renumber a single 2da.   The tool will report on the status of
+the given file. It will check for line numbers being off and report extra or missing columns.
+The headers line is assumed to have the correct entries. 
+
+The -v verbose flag will report more information (what is in the missing or extra column etc).
+Use -f to fix any errors. Missing columns in a row are filled with ****. Extras are removed from 
+the end obviously. There is no way to remove columns in the middle.
+
+use -p to cause the new file to be printed out. If -o is not specified then stdout is used. All 
+the information messages go to stderr. The file specified by -o must not be the same as the input file.
+
+The reprinted file will have all the columns lined up based on the size of the largest entry in each column and
+a small pad for legibility. 
+
+Report on errors in spells.2da 
+./diff2da.pl -ar spells.2da
+
+Fixup spells.2da and put the results in t.2da (these are the same)
+./diff2da.pl  -pfv spells.2da > t.2da  
+./diff2da.pl  -pfv -o t.2da spells.2da  
+
+Printing can also be in semi-colon separated format (use -S). Input file can be in either format (whitespace or semicolon).
+
+
+2) Show differences between 2 2da files.  (use -u at least)
+
+Because it operates only on the data and not the spaces differences in formatting are irrelevant. 
+
+Basic diff of 2 files will report differences in number of lines and columns and for common lines a statement that they differ.
+./diff2da.pl -u test2.2da test3.2da 
+Diffing test2.2da and test3.2da
+test3.2da has 1 more row(s) than test2.2da
+Row 0: 1 column(s) differ
+Row 2: num cols (2|3)  1 column(s) differ
+Row 3: Only in test3.2da
+
+
+verbose diff of 2 files will report differences in number of lines and columns and for common lines a full view of the differences.
+./diff2da.pl -uv test2.2da test3.2da 
+Diffing test2.2da and test3.2da
+test3.2da has 1 more row(s) than test2.2da
+Row 0: 1 column(s) differ  Value(1|9)
+Row 2: num cols (2|3)  1 column(s) differ  Label(third|"the third")
+Row 3: Only in test3.2da: "21 fourth ****"
+
+
+In either mode the lines and columns used can be selected or ignored. So a subset of a 2da can be printed (to extract some lines).
+All the lines with only the label can be extracted (useful to create an extension 2da file). Specific lines and columns may be diffed etc.
+
+Renumbering 2da files can be set to start at a given number. This is useful to format and validate an extracted set of 2da lines. 
+
+Here is the full usage message:
+
+Usage : ./diff2da.pl [-afhHpqrSuv] [-n start_line] [-o outfile] [-lL <list>] [ -c <list>] file1 [file2]
+         a: report all errors when validating
+         f: try to fix row and column errors, implies -ar
+         h: display this message
+         H: suppress printout of the header lines (including column labels)
+         p: print the resulting file (defaults to normal tabbed output)
+         q: suppress any extra informational messages
+         r: report file1's row number and column errors
+         S: print in semicolon separated format (useless without -p) 
+         u: diff file1 and file2. Files should be valid 2da files with no errors.
+         v: verbose output. Longer error messages and column differences
+         n <start_line>: use given starting line number for validation. Useful when operating on a subset of a 2da
+         o <outfile>: Write printed 2da to outfile. Must not be the same as file1 or file2
+         l <list>: operate on only the listed rows. E.g. -l 1,3,100..110  
+         L <list>: do not operate on the listed rows. E.g. -L 1,3,100..110  
+         Note: l and L are mutually exclusive
+         c <list>: operate on only the listed columns. E.g. -c Label,Value  
+         Note: column headers in <list>  case INsensitive (Label == label == LABEL)
+         Note: columns listed effect diffing and printout but not validation. 
+
+
+NOTE:  Any values with spaces MUST be double quoted.  There are a few entries in the CEP appeareances 2da file that are or were single quoted. 
+	Or had a double open and a single close. These should be fixed by hand before using. 
+
+	Any apostrophes are removed. This is due to a limitation in the string parsing library. It get's confused and treats them as quotes. 
+	This effects a small number of labels and names. At some point I may have time and energy to address this.
+
+
+

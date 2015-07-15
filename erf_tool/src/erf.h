@@ -3,6 +3,10 @@
  * Version: 1.1
  *
  * Copyright (C) 2003, Gareth Hughes <roboius@dladventures.net>
+ * Version: 1.2
+ *
+ * Copyright (C) 2014, Meaglyn <meaglyn.nwn@gmail.com>
+ *  	
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the

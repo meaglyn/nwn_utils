@@ -16,7 +16,9 @@ extern int tlkrenumber;
 
 extern char tlk_errstr[256];
 
+extern char *tlkcomp_name;
 extern char *tlkcomp_version;
+extern char *tlkcomp_contact;
 
 
 /* File header  */

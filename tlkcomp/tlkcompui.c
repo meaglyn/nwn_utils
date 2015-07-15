@@ -31,7 +31,9 @@ void do_usage() {
 	"\t-v: enable a bit mor everbose output, number of entries etc.\n\n"
 	"\t-r: enable automatic renumbering of lines set to 0. Will be given immediate next line number. Use with caution.\n\n"
 
-	"\t-d: enable debug output, lots of data you probably don't care about.\n");
+	"\t-d: enable debug output, lots of data you probably don't care about.\n"
+	"\n%s version %s : Copyright (C) 2015 %s\n\n", tlkcomp_name, tlkcomp_version, tlkcomp_contact
+);
 
 }
 
@@ -94,7 +96,7 @@ int main (int argc, char ** argv) {
 		tlkquiet = 0;
 
 	if (!tlkquiet) { 
-		printf("%s:", tlkcomp_version);
+		printf("%s : ", tlkcomp_name);
 		fflush(stdout);
 	}
 
