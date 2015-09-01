@@ -279,6 +279,7 @@ sub open2dafile {
 	    next;
 	}
 	
+	#TODO : filter off empty end lines
 
 	for my $i (0 .. $#row) { 
 	    next  if (!defined  $row[$i]); 
@@ -658,6 +659,8 @@ sub diff2da {
 	next if (!defined  $row1 || !defined  $row2);
 	#print STDERR "got row1 = @{$row1}\n";
 	#print STDERR "got row2 = @{$row2}\n";
+
+	next if (!defined ${$row1}[1] || !defined ${$row2}[1]);
 
 	my $diff_row = 0;
 	my $diff_col = 0;
