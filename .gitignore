@@ -1,3 +1,6 @@
+scripts/nwnnsscomp
+scripts/nwn-gff
+include
 nwntlkcomp
 tlktest
 tlstest
