@@ -1,0 +1,72 @@
+#
+# Configuration file for NWN Utils
+#
+# This should be copied to tool_cfg (dropping the .in) in the scripts directory 
+# of the NWN Utils tree. 
+#
+# This system requires the installation of several other components. 
+# The easiest way to do this is to put the varias binaries and ruby scripts in 
+# this directory  and expand the include files in the parent. 
+# Requirements:
+#
+# nwn-lib ruby gem and ruby. Put the nwn-gff script in here or update the path
+#
+# nwnnsscomp script compiler from Meaglyn's nwn-tools repo built and installed here or path updated
+#
+# unpacked archive of nwscript include files from all NWN releases and optionally cpp1.71. In parent 
+# directory or path updated.
+#
+# Erf utility (from this repo) built and installed here (or path updated...)
+#
+# nwntlkcomp TLK file compiler, built and installed here (or path updated...)
+
+
+TOOLDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+echo TOOLDIR = ${TOOLDIR}
+
+ROOTDIR="$( cd "$( dirname "${TOOLDIR}" )" && pwd )"
+echo TOOLDIR = ${ROOTDIR}
+
+#If you do not install these other utilities in this directory then you need to 
+#link then here or update these paths to be corrent. 
+#Path to ruby nwn-gff script
+NWNGFF=${TOOLDIR}/nwn-gff
+
+#Path to erf command
+ERF=${TOOLDIR}/erf
+
+#Path to TLK file compiler 
+NWNTLKCOMP=${TOOLDIR}/nwntlkcomp
+
+#Path to script compiler 
+NWNCOMP=${TOOLDIR}/nwnnsscomp
+ 
+# path to directory of NWN include files. 
+INCDIR=${ROOTDIR}/include
+
+# flags for nwnnsscomp
+NWNFLAGS="-qr"
+# To add symbol checking
+#NWNFLAGS="-qrs"
+ 
+#support for cpp include directory - only use this if you plan to run any modules with CPP1.71
+#NWNCPP=
+NWNCPP="-k"
+
+##########
+#These are part of nwntools package so should not need to be changed
+
+# extentions of GFF files
+EXTS="bic are git gic uti utc utt utw utm utp itp dlg ifo jrl utd fac ute uts"
+
+# Convert a whole directory of files to YML from GFF (or the reverse)
+MKYAML=${TOOLDIR}/make_yaml.sh
+MKYAML=${TOOLDIR}/make_gff.sh
+
+# float tructation filter used during conversions from gff to yaml.
+TRUNKSCRIPT=${TOOLDIR}/truncate_floats.rb
+
+# nwn-gff input and output formats - both not used in the same command...
+INFORMAT=yaml
+OUTFORMAT=yaml
+

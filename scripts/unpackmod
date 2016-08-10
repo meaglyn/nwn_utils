@@ -1,0 +1,161 @@
+#!/bin/sh
+if [ "${NWNTOOLS}x" == "x" ] ; then
+	NWNTOOLS="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+	echo Environement variable NWNTOOLS unset using ${NWNTOOLS}
+fi
+
+if [ -f ${NWNTOOLS}/tool_cfg ] ; then 
+	source ${NWNTOOLS}/tool_cfg
+else
+	echo unable to find config file ${NWNTOOLS}/tool_cfg
+fi
+
+
+extract=0
+force=0
+exists=0
+verbose=0
+remove=0
+convert=0
+
+usage() {
+    echo "Usage : unpackmod.sh [-f] [-v] [-c] [-x [-r]] [-o workdir] infile.mod"
+    exit 1 
+}
+
+if [ $# -eq 0 ] ; then
+    usage    
+fi
+
+while [ $# -gt 1 ] ; do
+    case $1 in
+	-c) convert=1 ; shift 1 ;;
+	-f) force=1 ; shift 1 ;;
+	-r) remove=1 ; shift 1 ;;
+	-x) extract=1 ; shift 1 ;;
+	-v) verbose=1 ; shift 1 ;;
+	-o) DIR=$2 ; shift 2 ;;
+    esac
+done
+
+#DIR=$2
+INFILE=$1
+
+if [ "${DIR}x" = "x" ] ; then 
+    #echo Usage : unpackmod.sh  infile.mod workdir
+    #exit 1
+    DIR=temp0
+fi
+
+if [ "${INFILE}x" = "x" ] ; then 
+     usage
+fi
+
+if [ ${extract} -eq 1 -a ${convert} -eq 1 ] ; then
+    echo both extract and convert cannot be used. Assuming convert.
+    extract=0
+fi
+
+
+if [ -d "${DIR}" ] ; then
+    if [ ${force} -eq 0 ] ; then
+	echo "$DIR already exists"
+	exit 1
+    else
+	exists=1
+    fi
+fi
+
+if [ ! -f "${INFILE}" ] ; then 
+    echo "Can't find $INFILE!"
+    exit 1
+fi
+
+MYPWD=`pwd`
+case ${INFILE} in
+     /*) absolute=1 ;;
+     *) absolute=0 ;;
+esac
+
+if [ ${absolute} -eq 0 ] ; then
+    INFILEPATH=${MYPWD}/${INFILE}
+else
+    INFILEPATH=${INFILE}
+fi 
+
+#echo output dir = ${DIR}
+#echo input file = ${INFILE}
+#exit 0
+
+if [ ${exists} -eq 0 ] ; then
+    mkdir ${DIR}
+fi
+
+cd ${DIR}
+
+#if [ ${verbose} -eq 1 ] ; then
+    echo Unpacking module ${INFILE} into ${DIR} 
+#fi
+
+${ERF} -x ${INFILEPATH}
+
+if [ ! $? -eq 0 ] ; then
+    echo failed to extract ${INFILE}
+    cd ${MYPWD}
+    exit 1
+fi
+
+if [ ${convert} -eq 1 ] ; then
+
+    # remove compiled scripts
+    rm -f *.ncs
+
+    #if [ ${verbose} -eq 1 ] ; then
+    echo "Converting and filtering gff files in ${INFILE}..."
+    #fi 
+    
+    if [ ${verbose} -eq 1 ] ; then
+	${MKYAML}
+    else
+		${MKYAML} > /dev/null
+    fi
+
+    #if [ ${verbose} -eq 1 ] ; then
+    echo "Done converting and filtering gff files in ${INFILE}"
+    #fi 
+fi  
+
+
+if [ ${extract} -eq 1 ] ; then
+
+    #if [ ${verbose} -eq 1 ] ; then
+	echo "Extracting gff files in ${INFILE}"
+    #fi 
+
+    for i in `ls -1 | grep -v \.nss | grep -v \.ncs` 
+    do 
+	if [ ${verbose} -eq 1 ] ; then
+	      echo ${NWNGFF} -i $i -l gff -o ${i}.yml -k ${OUTFORMAT}
+	fi
+
+	RET=`${NWNGFF} -i $i -l gff -o ${i}.yml -k ${OUTFORMAT}`
+	if [ "$?" -ne 0 ] ; then
+	    echo ERROR: ${RET}
+	    exit 1
+	fi
+
+	if [ ${remove} -eq 1 ] ; then
+	    rm $i
+	    if [ ${verbose} -eq 1 ] ; then
+		echo Removing GFF file $i
+	    fi
+	fi
+    done
+fi
+
+
+cd ${MYPWD}
+
+echo Extracted ${INFILE} to ${DIR}
+
+

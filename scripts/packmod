@@ -1,0 +1,126 @@
+#!/bin/sh
+
+# repack an expanded module - converting yaml files back to gff first as needed.
+if [ "${NWNTOOLS}x" == "x" ] ; then
+        NWNTOOLS="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+        echo Environement variable NWNTOOLS unset using ${NWNTOOLS}
+fi
+
+if [ -f ${NWNTOOLS}/tool_cfg ] ; then 
+	source ${NWNTOOLS}/tool_cfg
+else
+	echo unable to find config file ${NWNTOOLS}/tool_cfg
+fi
+
+keep=1
+
+usage() {
+    echo "Usage : packmod.sh [-k|-r] [-o workdir] outfile.mod"
+    exit 1 
+}
+
+if [ $# -eq 0 ] ; then
+    usage    
+fi
+
+while [ $# -gt 1 ] ; do
+    case $1 in
+	-k) keep=1 ; shift 1 ;;
+	-r) keep=0 ; shift 1 ;;
+	-o) DIR=$2 ; shift 2 ;;
+    esac
+done
+
+#DIR=$2
+OUTFILE=$1
+
+
+if [ "${DIR}x" = "x" ] ; then 
+    #echo Usage : packmod.sh  outfile.mod dir
+    #exit 1
+    DIR=temp0
+fi
+
+if [ "${OUTFILE}x" = "x" ] ; then 
+    usage
+fi
+
+if [ ! -d "${DIR}" ] ; then
+    echo "$DIR is not a directory"
+    exit 1
+fi
+
+MYPWD=`pwd`
+
+echo Creating ${OUTFILE} from ${DIR}
+#exit 0
+
+cd ${DIR}
+rm -f *~ \#* 
+
+# convert any unix files to DOS
+UNIXFILES=`file *.nss | grep -v CRLF  | awk -F":" '{ print $1}'`
+#echo ${UNIXFILES}
+if [ ! "${UNIXFILE}x" = "x" ] ; then 
+    unix2dos ${UNIXFILES}
+fi
+
+#XMLFILES=`find . -name \*.xml`
+#echo ${XMLFILES}
+
+#for i in `ls -1 --color=no *.xml` ; do
+#for i in ${XMLFILES} ; do
+    #echo $i
+#    j=`echo $i | sed 's/\(.*\)\..*/\1/'`
+#    RES=`${XML2GFF} --log:1 $i $j` 
+#     if [ "${RES}x" != "x" ] ; then
+#	echo ERROR: ${RES}
+#	exit 1
+#    fi
+#    rm -f $i
+#done
+
+YAMLFILES=`find . -name \*.yml`
+
+echo -n "Converting YML files "
+c=0
+for i in ${YAMLFILES} ; do
+    #echo $i
+    j=`echo $i | sed 's/\(.*\)\..*/\1/'`
+    # echo ${NWNGFF} -i $i -l yaml -o $j -k gff
+    RES=`${NWNGFF} -i $i -l yaml -o $j -k gff`
+     if [ "$?" -ne 0 ] ; then
+	echo ERROR: ${RES}
+	echo ${NWNGFF} -i $i -l yaml -o $j -k gff
+	exit 1
+    fi
+    rm -f $i
+    c=$(($c + 1))
+    n=$(($c%5))
+    if [ $n -eq 0 ] ; then 
+	echo -n "."
+    fi
+done
+echo
+
+
+RES=`${ERF} -c ../${OUTFILE} *`
+
+if [ ! $? -eq 0 ] ; then 
+    echo erf command failed with ${RES}
+    cd ${MYPWD}
+    exit 1
+fi
+
+cd ${MYPWD}
+
+if [ ${keep} -eq 1 ] ; then 
+   echo  Created ${OUTFILE}
+else 
+    echo Created ${OUTFILE}- now removing ${DIR}
+    rm -rf ${DIR}
+fi
+
+echo Done
+
+
