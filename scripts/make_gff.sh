@@ -4,7 +4,7 @@
 # Run from the work directory. This deletes the yml files.
 
 if [ "${NWNTOOLS}x" == "x" ] ; then
-	NWNTOOLS="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+	NWNTOOLS=`dirname $(readlink -f $0)`
 	echo Environement variable NWNTOOLS unset using ${NWNTOOLS}
 fi
 
@@ -12,6 +12,7 @@ if [ -f ${NWNTOOLS}/tool_cfg ] ; then
 	source ${NWNTOOLS}/tool_cfg
 else
 	echo unable to find config file ${NWNTOOLS}/tool_cfg
+	exit 1
 fi
 
 

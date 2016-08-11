@@ -1,7 +1,9 @@
 #!/bin/sh
 
 if [ "${NWNTOOLS}x" == "x" ] ; then
-	NWNTOOLS="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+	#NWNTOOLS="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd -P )"  # does not work if file itself is a link
+	#NWNTOOLS=`dirname $(realpath  $0)`   # this one works
+	NWNTOOLS=`dirname $(readlink -f $0)`
 	echo Environement variable NWNTOOLS unset using ${NWNTOOLS}
 fi
 
@@ -9,8 +11,8 @@ if [ -f ${NWNTOOLS}/tool_cfg ] ; then
 	source ${NWNTOOLS}/tool_cfg
 else
 	echo unable to find config file ${NWNTOOLS}/tool_cfg
+	exit 1
 fi
-
 
 rm -f *.ncs
 rm -f *~
