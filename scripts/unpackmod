@@ -118,7 +118,7 @@ if [ ${convert} -eq 1 ] ; then
     if [ ${verbose} -eq 1 ] ; then
 	${MKYAML}
     else
-		${MKYAML} > /dev/null
+	${MKYAML} > /dev/null
     fi
 
     #if [ ${verbose} -eq 1 ] ; then

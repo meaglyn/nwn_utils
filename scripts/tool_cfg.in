@@ -57,11 +57,11 @@ NWNCPP="-k"
 #These are part of nwntools package so should not need to be changed
 
 # extentions of GFF files
-EXTS="bic are git gic uti utc utt utw utm utp itp dlg ifo jrl utd fac ute uts"
+EXTS="gff bic are git gic uti utc utt utw utm utp itp dlg ifo jrl utd fac ute uts"
 
 # Convert a whole directory of files to YML from GFF (or the reverse)
 MKYAML=${TOOLDIR}/make_yaml.sh
-MKYAML=${TOOLDIR}/make_gff.sh
+MKGFF=${TOOLDIR}/make_gff.sh
 
 # float tructation filter used during conversions from gff to yaml.
 TRUNKSCRIPT=${TOOLDIR}/truncate_floats.rb
