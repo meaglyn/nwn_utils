@@ -3,7 +3,7 @@
 # repack an expanded module - converting yaml files back to gff first as needed.
 if [ "${NWNTOOLS}x" == "x" ] ; then
 	NWNTOOLS=`dirname $(readlink -f $0)`
-        echo Environement variable NWNTOOLS unset using ${NWNTOOLS}
+        #echo Environement variable NWNTOOLS unset using ${NWNTOOLS}
 fi
 
 if [ -f ${NWNTOOLS}/tool_cfg ] ; then 
@@ -26,10 +26,17 @@ fi
 
 while [ $# -gt 1 ] ; do
     case $1 in
-	-k) keep=1 ; shift 1 ;;
-	-r) keep=0 ; shift 1 ;;
-	-o) DIR=$2 ; shift 2 ;;
+	-k) keep=1 ; 
+	    ;;
+	-r) keep=0 ;
+	    ;;
+	-o) DIR=$2 ; shift 1 ;;
+
+	-*) echo unknown argument: ${1}
+	    usage
+	    ;;
     esac
+    shift 1
 done
 
 #DIR=$2
@@ -48,6 +55,7 @@ fi
 
 if [ ! -d "${DIR}" ] ; then
     echo "$DIR is not a directory"
+    usage 
     exit 1
 fi
 
