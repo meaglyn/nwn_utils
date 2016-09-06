@@ -1,12 +1,16 @@
 /*
  * Neverwinter Nights ERF Utility
+ *
  * Version: 1.1
- *
  * Copyright (C) 2003, Gareth Hughes <roboius@dladventures.net>
+ * 
  * Version: 1.2
- *
  * Copyright (C) 2014, Meaglyn <meaglyn.nwn@gmail.com>
+ * 
+ * Version 1.3
+ * Copyright (C) 2014,2016, Phil Auld "Meaglyn" <meaglyn.nwn@gmail.com>
  *
+ * 
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
  * Free Software Foundation; either version 2 of the License, or (at your
@@ -33,9 +37,9 @@
 
 #include "erf.h"
 
-#define ERF_VERSION     "1.2"
+#define ERF_VERSION     "1.3"
 #define ERF_AUTHOR      "Meaglyn <meaglyn.nwn@gmail.com>"
-#define ERF_COPYRIGHT   "Copyright (C) 2003, Gareth Hughes. Bugfixes and enhancements: Copyright (C) 2014 Meaglyn"
+#define ERF_COPYRIGHT   "Original Copyright (C) 2003, Gareth Hughes. Copyright (C) 2014,2016 Meaglyn"
 
 #ifndef BYTE_ORDER
 #define LITTLE_ENDIAN   1234
@@ -70,11 +74,14 @@ typedef enum {
 } command_t;
 
 static char verbose = 0;
+static char showdesc = 0;
 
 /* Format is "Title\nURL\nDescription\0".
  */
 static char default_string[] =
     "\n\nCreated by \"erf\", the command-line ERF utility.\n" ERF_COPYRIGHT;
+
+char * description_string = default_string;
 
 /**********************************************************************/
 
@@ -352,8 +359,8 @@ static void erf_load(struct erf *erf)
         erf->strings = (struct erf_string *) malloc(erf->header.string_size);
 
         fseek(file, erf->header.string_offset, SEEK_SET);
-        if (fread(erf->strings, erf->header.string_size, 1, file) < 1) {
-            fatal_error("short read on ERF strings");
+	if (fread(erf->strings, erf->header.string_size, 1, file)  < 1) {
+		    fatal_error("short read on ERF strings");
         }
     }
 
@@ -634,8 +641,11 @@ static void erf_create_header(struct erf *erf)
     }
 
     erf->header.string_count = 1;
-    erf->header.string_size = sizeof(struct erf_string) +
-                              sizeof(default_string);
+    //erf->header.string_size = sizeof(struct erf_string) + sizeof(default_string); 
+    erf->header.string_size = sizeof(struct erf_string) + strlen(description_string);
+    //printf("setting string size to %u (%u + %u)\n", (unsigned int) (sizeof(struct erf_string) + strlen(description_string)),
+    //   (unsigned int) sizeof(struct erf_string), (unsigned int) strlen(description_string));
+
 
     erf->header.build_year = tm->tm_year;
     erf->header.build_day = tm->tm_yday;
@@ -739,8 +749,8 @@ static void erf_add_resources(struct erf *erf, struct erf_resource_list *list)
 
     offset = erf->header.resource_offset + count * sizeof(struct erf_data);
 
-    erf->strings = string = (struct erf_string *)
-        malloc(erf->header.string_size);
+    erf->strings = (struct erf_string *) malloc(erf->header.string_size);
+    string = erf->strings;
     erf->keys = (struct erf_key *) malloc(count * sizeof(struct erf_key));
     erf->data = (struct erf_data *) malloc(count * sizeof(struct erf_data));
 
@@ -749,7 +759,8 @@ static void erf_add_resources(struct erf *erf, struct erf_resource_list *list)
      */
     string->language = ERF_LANGUAGE_ENGLISH;
     string->length = erf->header.string_size;
-    memcpy(string->data, default_string, sizeof(default_string));
+    //memcpy(string->data, default_string, sizeof(default_string)); 
+    memcpy(string->data, description_string, strlen(description_string));
 
     /* Build the key and resource lists.
      */
@@ -827,6 +838,10 @@ static void erf_extract(struct erf *erf)
     FILE *file;
     u32 ii;
 
+    if (showdesc && erf->strings != NULL && erf->strings->data != NULL) {
+	    printf("\"%s\"\n", erf->strings->data);
+    }
+    
     for (ii = 0; ii < erf->header.entry_count; ii++) {
         struct erf_resource *res = erf->resources[ii];
         char name[21] = { 0, };
@@ -859,6 +874,10 @@ static void erf_list(struct erf *erf)
     u32 ii;
 
     if (verbose) {
+	
+	if (erf->strings != NULL && erf->strings->data != NULL) {
+		printf("Desc = \"%s\"\n", erf->strings->data);
+	}
         for (ii = 0; ii < erf->header.entry_count; ii++) {
             struct erf_resource *res = erf->resources[ii];
 
@@ -868,21 +887,24 @@ static void erf_list(struct erf *erf)
                    res->data.length);
         }
     } else {
-        for (ii = 0; ii < erf->header.entry_count; ii++) {
-            struct erf_resource *res = erf->resources[ii];
-
-            printf("%.16s%.4s\n",
-                   res->key.name,
-                   get_extension_from_type(res->key.type));
-        }
+	    if (showdesc && erf->strings != NULL && erf->strings->data != NULL) {
+		    printf("\"%s\"\n", erf->strings->data);
+	    }
+	    for (ii = 0; ii < erf->header.entry_count; ii++) {
+		    struct erf_resource *res = erf->resources[ii];
+		    
+		    printf("%.16s%.4s\n",
+			   res->key.name,
+			   get_extension_from_type(res->key.type));
+	    }
     }
 }
 
 /**********************************************************************/
 
-static void usage(void)
+static void usage(int exitval)
 {
-    fputs("Neverwinter Nights Encapsulated Resource File (ERF) Utility\n"
+    fputs("Neverwinter Nights Encapsulated Resource File (ERF) Utility (version ERF_VERSION) \n"
           ERF_COPYRIGHT "\n"
           "\n"
           "erf can write NWN .erf, .hak, .mod, .nwm and .sav files.  The type is \n"
@@ -896,6 +918,8 @@ static void usage(void)
           "  erf -tv archive.hak           # List all files in archive.hak verbosely.\n"
           "  erf -u archive.hak foo        # Update file foo in archive.hak.\n"
           "  erf -x archive.hak            # Extract all files from archive.hak.\n"
+	  "  erf -cd $'Lots of lines \\n \\n here \\n'  archive.hak foo bar  # create with description containing newlines.\n"
+
           "\n"
           "Main operation mode:\n"
           "  -c, --create                  create a new archive\n"
@@ -905,11 +929,15 @@ static void usage(void)
           "\n"
           "Informative output:\n"
           "  -h, --help                    print this help, then exit\n"
-          "  -v, --verbose                 verbosely list files processed\n"
+          "  -v, --verbose                 verbosely list files processed (includes -D)\n"
+	  "  -D,                           print the description to stdout\n"
           "      --version                 print erf program version number, then exit\n"
           "\n"
+	  "Input options:\n"
+	  "  -d, --desc                    Use given string as description instead of default\n"
+	  "\n"
           "Report bugs to " ERF_AUTHOR ".\n", stdout);
-    exit(0);
+    exit(exitval);
 }
 
 static void version(void)
@@ -928,6 +956,24 @@ static void set_command(command_t *command, command_t new_command)
     *command = new_command;
 }
 
+static int set_description(char * desc) {
+	if (desc != NULL) {
+		int len = strlen(desc);
+		if (len <= 0) {
+			return -1;
+		}
+		description_string = malloc(len +1);
+		strncpy(description_string, desc, len);
+		//description_string[len] = '\n';
+		//description_string[len + 1] = 0;
+		description_string[len] = 0;
+		printf("Got description \"%s\"\n", description_string);
+		return 0;
+	}
+	return -1;
+}
+
+
 int main(int argc, char *argv[])
 {
     struct erf erf = { 0, };
@@ -935,6 +981,7 @@ int main(int argc, char *argv[])
     command_t command = COMMAND_DEFAULT;
     char **files = NULL;
     int num_files = 0, ii;
+    int have_desc = 0;
 
     for (ii = 1; ii < argc; ii++) {
         if (argv[ii][0] == '-' && argv[ii][1] != '-') {
@@ -942,7 +989,7 @@ int main(int argc, char *argv[])
                 verbose = 1;
             }
             if (strchr(argv[ii], 'h')) {
-                usage();
+                usage(0);
             }
             if (strchr(argv[ii], 'c')) {
                 set_command(&command, COMMAND_CREATE);
@@ -955,17 +1002,41 @@ int main(int argc, char *argv[])
             }
             if (strchr(argv[ii], 'u')) {
                 set_command(&command, COMMAND_UPDATE);
+            } 
+	    if (strchr(argv[ii], 'D')) {
+		    showdesc = 1;
             }
+	    if (strchr(argv[ii], 'd')) {
+		    if (set_description(argv[ii +1])) {
+			    usage(1);
+		    } 
+		    have_desc = 1;
+		    ii++;
+            }
+	  /* 	 else {
+		    fprintf(stderr, "Unknown option \"-%s\"\n", argv[ii]);
+		    fprintf(stderr, "Try 'erf --help' for more information.\n");
+		    exit(1);
+		    //usage(1);
+	    }
+	    */
         } else if (strcmp(argv[ii], "--create") == 0) {
-            set_command(&command, COMMAND_CREATE);
+		set_command(&command, COMMAND_CREATE);
         } else if (strcmp(argv[ii], "--extract") == 0) {
-            set_command(&command, COMMAND_EXTRACT);
+		set_command(&command, COMMAND_EXTRACT);
         } else if (strcmp(argv[ii], "--help") == 0) {
-            usage();
+		usage(0);
         } else if (strcmp(argv[ii], "--list") == 0) {
-            set_command(&command, COMMAND_LIST);
+		set_command(&command, COMMAND_LIST);
         } else if (strcmp(argv[ii], "--update") == 0) {
-            set_command(&command, COMMAND_UPDATE);
+		set_command(&command, COMMAND_UPDATE);
+        } else if (strcmp(argv[ii], "--desc") == 0) {
+		if (set_description(argv[ii +1])) {
+			usage(1);
+		} 
+		have_desc = 1;
+		ii++;
+		
         } else if (strcmp(argv[ii], "--verbose") == 0) {
             verbose = 1;
         } else if (strcmp(argv[ii], "--version") == 0) {
@@ -973,9 +1044,15 @@ int main(int argc, char *argv[])
         } else if (erf.name == NULL) {
             erf.name = argv[ii];
         } else {
-            files = &argv[ii];
-            num_files = argc - ii;
-            break;
+		// Check for unexpanded wildcards. This is an error
+		if (strchr(argv[ii], '*') || strchr(argv[ii], '?')) {
+			files =  &argv[ii];
+			num_files = 0;
+		} else {
+			files = &argv[ii];
+			num_files = argc - ii;
+		}
+		break;
         }
     }
 
@@ -994,6 +1071,12 @@ int main(int argc, char *argv[])
         fatal_error("no input files");
     }
     
+    if (command != COMMAND_CREATE && command != COMMAND_UPDATE && command != COMMAND_DEFAULT &&  have_desc) {
+	    printf("Adding description is only meaningful with create (-c) or update (-u). Ignored\n");
+    } 
+    if ((command == COMMAND_CREATE || command == COMMAND_UPDATE) && showdesc) {
+	    printf("Printing description is only meaningful with list (-t) or extract (-x). Ignored\n");
+    }
     //printf("erf called %s num files %d\n", erf.name, num_files);
     
 

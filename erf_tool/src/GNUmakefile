@@ -2,7 +2,7 @@
 ## Definitions
 ##
 
-CFLAGS = -g -O2 -Wall
+CFLAGS = -m32 -g -O2 -Wall
 
 SRCS = erf.c
 OBJS = $(SRCS:.c=.o)
@@ -23,7 +23,7 @@ TARGETS = erf
 default: $(TARGETS)
 
 erf: $(OBJS)
-	$(CC) -o $@ $<
+	$(CC) ${CFLAGS} -o $@ $<
 
 clean:
 	rm $(TARGETS) *.o
