@@ -84,6 +84,16 @@ else
     INFILEPATH=${INFILE}
 fi 
 
+extension="${INFILE##*.}"
+DESC_COMMAND=""
+if [ "${extension}" = "mod" ] ; then
+    DESC_COMMAND="-E module_description"
+else 
+    DESC_COMMAND="-E erf_description"
+fi
+
+#echo Putting description in \"${DESC_COMMAND}\"
+
 #echo output dir = ${DIR}
 #echo input file = ${INFILE}
 #exit 0
@@ -98,7 +108,7 @@ cd ${DIR}
     echo Unpacking module ${INFILE} into ${DIR} 
 #fi
 
-${ERF} -x ${INFILEPATH}
+${ERF} ${DESC_COMMAND} -x ${INFILEPATH}
 
 if [ ! $? -eq 0 ] ; then
     echo failed to extract ${INFILE}

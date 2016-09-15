@@ -934,6 +934,8 @@ static void usage(int exitval)
           "  erf -u archive.hak foo        # Update file foo in archive.hak.\n"
           "  erf -x archive.hak            # Extract all files from archive.hak.\n"
 	  "  erf -cd $'Lots of lines \\n \\n here \\n'  archive.hak foo bar  # create with description containing newlines.\n"
+	  "  erf -F descfile -c archive.hak foo  # create archive.hak with description text from descfile.\n"
+	  "  erf -E descfile -x archive.hak  # extract all files from archive.hak putting description string in descfile.\n"
 
           "\n"
           "Main operation mode:\n"
@@ -946,10 +948,12 @@ static void usage(int exitval)
           "  -h, --help                    print this help, then exit\n"
           "  -v, --verbose                 verbosely list files processed (includes -D)\n"
 	  "  -D,                           print the description to stdout\n"
+	  "  -E <descfile>                 write description string to descfile (use with -x)\n"
           "      --version                 print erf program version number, then exit\n"
           "\n"
 	  "Input options:\n"
 	  "  -d, --desc                    Use given string as description instead of default\n"
+	  "  -F <descfile>,                Use contents of descfile as description text (use with -c or -u)\n"  
 	  "\n"
           "Report bugs to " ERF_AUTHOR ".\n", stdout);
     exit(exitval);
@@ -979,8 +983,6 @@ static int set_description(char * desc) {
 		}
 		description_string = malloc(len +1);
 		strncpy(description_string, desc, len);
-		//description_string[len] = '\n';
-		//description_string[len + 1] = 0;
 		description_string[len] = 0;
 		printf("Got description \"%s\"\n", description_string);
 		return 0;
@@ -997,10 +999,9 @@ static int set_description_from_file(char * descfile) {
 		}
 		fseek(fptr, 0L, SEEK_END);
 		int sz = ftell(fptr);
-		char *desc = malloc (sz + 1);
-		
+		char *desc = malloc (sz + 1);		
 		fseek(fptr, 0L, SEEK_SET);
-		//fscanf(fptr,"%[^\n]",desc);
+     
 		int c;
 		int i = 0;
 		while ((c = getc(fptr)) != EOF) {

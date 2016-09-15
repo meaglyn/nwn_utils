@@ -61,6 +61,19 @@ fi
 
 MYPWD=`pwd`
 
+DESC_COMMAND=""
+if [ -f "${DIR}/module_description" ] ; then 
+    DESC_COMMAND="-F module_description"
+elif [ -f "${DIR}/erf_description" ] ; then
+    DESC_COMMAND="-F erf_description"
+else 
+    DESC_COMMAND=""
+fi 
+
+#if [ "${DESC_COMMAND}x" != "x" ] ; then
+#    echo Got Description file \"${DESC_COMMAND}\"
+#fi
+
 echo Creating ${OUTFILE} from ${DIR}
 #exit 0
 
@@ -113,7 +126,7 @@ done
 echo
 
 
-RES=`${ERF} -c ../${OUTFILE} *`
+RES=`${ERF} ${DESC_COMMAND} -c ../${OUTFILE} *`
 
 if [ ! $? -eq 0 ] ; then 
     echo erf command failed with ${RES}
