@@ -75,6 +75,7 @@ typedef enum {
 
 static char verbose = 0;
 static char showdesc = 0;
+static char writedesc = 0;
 
 /* Format is "Title\nURL\nDescription\0".
  */
@@ -82,6 +83,7 @@ static char default_string[] =
     "\n\nCreated by \"erf\", the command-line ERF utility.\n" ERF_COPYRIGHT;
 
 char * description_string = default_string;
+char *desc_file = NULL;
 
 /**********************************************************************/
 
@@ -453,8 +455,10 @@ static struct erf_resource_list *load_files(char **files, int num_files)
 		fatal_error("ERF file '%s' handled incorrectly", files[ii]);
         }
         if (type == ERF_RESOURCE_TYPE_UNKNOWN) {
-            fprintf(stderr, "skiping non-NWN file '%s'\n", files[ii]);
-            continue;
+		if (desc_file != NULL && strncmp(files[ii], desc_file, strlen(files[ii]))) {
+			fprintf(stderr, "skiping non-NWN file '%s'\n", files[ii]);
+		}
+		continue;
         }
 
         if (stat(files[ii], &st) < 0) {
@@ -841,6 +845,17 @@ static void erf_extract(struct erf *erf)
     if (showdesc && erf->strings != NULL && erf->strings->data != NULL) {
 	    printf("\"%s\"\n", erf->strings->data);
     }
+
+    if (writedesc && erf->strings != NULL && erf->strings->data != NULL) {
+	    file = fopen(desc_file, "wb");
+	    if (!file) {
+		    fatal_error("unable to open file '%s'\n", desc_file);
+	    }
+	    if (fputs(erf->strings->data, file) == EOF) {
+		    fatal_error("unable to write file '%s'\n", desc_file);
+	    }
+	    fclose(file);
+    }
     
     for (ii = 0; ii < erf->header.entry_count; ii++) {
         struct erf_resource *res = erf->resources[ii];
@@ -973,6 +988,33 @@ static int set_description(char * desc) {
 	return -1;
 }
 
+static int set_description_from_file(char * descfile) {
+	if (descfile != NULL) {
+		FILE *fptr;
+		if ((fptr=fopen(descfile,"r"))==NULL){
+			printf("Error! opening file");
+			return -1;
+		}
+		fseek(fptr, 0L, SEEK_END);
+		int sz = ftell(fptr);
+		char *desc = malloc (sz + 1);
+		
+		fseek(fptr, 0L, SEEK_SET);
+		//fscanf(fptr,"%[^\n]",desc);
+		int c;
+		int i = 0;
+		while ((c = getc(fptr)) != EOF) {
+			desc[i++] = c;
+		}
+		desc[i] = 0;
+
+		printf("Description from file (%d) : \"%s\" \n",sz, desc);
+		fclose(fptr);
+		return set_description(desc);
+	}
+	return -1;
+}
+
 
 int main(int argc, char *argv[])
 {
@@ -981,7 +1023,7 @@ int main(int argc, char *argv[])
     command_t command = COMMAND_DEFAULT;
     char **files = NULL;
     int num_files = 0, ii;
-    int have_desc = 0;
+    int have_desc = 0; 
 
     for (ii = 1; ii < argc; ii++) {
         if (argv[ii][0] == '-' && argv[ii][1] != '-') {
@@ -1011,6 +1053,19 @@ int main(int argc, char *argv[])
 			    usage(1);
 		    } 
 		    have_desc = 1;
+		    ii++;
+            } 
+	    if (strchr(argv[ii], 'F')) {
+		    desc_file = argv[ii +1];
+		    if (set_description_from_file(desc_file)) {
+			    usage(1);
+		    } 
+		    have_desc = 1;
+		    ii++;
+            } 
+	    if (strchr(argv[ii], 'E')) {
+		    desc_file = argv[ii +1];
+		    writedesc = 1;
 		    ii++;
             }
 	  /* 	 else {
@@ -1076,6 +1131,9 @@ int main(int argc, char *argv[])
     } 
     if ((command == COMMAND_CREATE || command == COMMAND_UPDATE) && showdesc) {
 	    printf("Printing description is only meaningful with list (-t) or extract (-x). Ignored\n");
+    } 
+    if ((command == COMMAND_CREATE || command == COMMAND_UPDATE) && writedesc) {
+	    printf("writing description is only meaningful with extract (-x). -E argument Ignored\n");
     }
     //printf("erf called %s num files %d\n", erf.name, num_files);
     
