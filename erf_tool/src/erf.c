@@ -762,7 +762,8 @@ static void erf_add_resources(struct erf *erf, struct erf_resource_list *list)
      * FIXME: Allow the string to be passed in as a command-line option.
      */
     string->language = ERF_LANGUAGE_ENGLISH;
-    string->length = erf->header.string_size;
+    //string->length = erf->header.string_size;
+    string->length = strlen(description_string); //erf->header.string_size;
     //memcpy(string->data, default_string, sizeof(default_string)); 
     memcpy(string->data, description_string, strlen(description_string));
 
