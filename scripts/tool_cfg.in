@@ -52,6 +52,8 @@ NWNFLAGS="-qr"
 #support for cpp include directory - only use this if you plan to run any modules with CPP1.71
 #NWNCPP=
 NWNCPP="-k"
+# set to -n instead to support nwnee
+#NWNCPP="-n"
 
 ##########
 #These are part of nwntools package so should not need to be changed
