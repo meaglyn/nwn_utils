@@ -149,11 +149,24 @@ static const char *get_extension_from_type(u32 type)
     case ERF_RESOURCE_TYPE_NWM: return ".nwm";
     case ERF_RESOURCE_TYPE_PTM: return ".ptm";
     case ERF_RESOURCE_TYPE_PTT: return ".ptt";
+    case ERF_RESOURCE_TYPE_BAK: return ".bak";
+    case ERF_RESOURCE_TYPE_DAT: return ".dat";
+    case ERF_RESOURCE_TYPE_SHD: return ".shd";
+    case ERF_RESOURCE_TYPE_XBC: return ".xbc";
+    case ERF_RESOURCE_TYPE_WBM: return ".wbm";
+    case ERF_RESOURCE_TYPE_MTR: return ".mtr";
+    case ERF_RESOURCE_TYPE_KTX: return ".ktx";
+    case ERF_RESOURCE_TYPE_TTF: return ".ttf";
+    case ERF_RESOURCE_TYPE_SQL: return ".sql";
+    case ERF_RESOURCE_TYPE_TML: return ".tml";
+    case ERF_RESOURCE_TYPE_SQ3: return ".sq3";
+    case ERF_RESOURCE_TYPE_IDS: return ".ids";
     case ERF_RESOURCE_TYPE_ERF: return ".erf";
     case ERF_RESOURCE_TYPE_BIF: return ".bif";
     case ERF_RESOURCE_TYPE_KEY: return ".key";
     case ERF_RESOURCE_TYPE_UNKNOWN:
     default:
+      printf("Unknown type %0d\n", type);
         return ".unk";
     }
 }
@@ -210,6 +223,18 @@ static u32 get_type_from_extension(const char *ext)
     if (strncmp(ext, "nwm", 3) == 0) return ERF_RESOURCE_TYPE_NWM;
     if (strncmp(ext, "ptm", 3) == 0) return ERF_RESOURCE_TYPE_PTM;
     if (strncmp(ext, "ptt", 3) == 0) return ERF_RESOURCE_TYPE_PTT;
+    if (strncmp(ext, "bak", 3) == 0) return ERF_RESOURCE_TYPE_BAK;
+    if (strncmp(ext, "dat", 3) == 0) return ERF_RESOURCE_TYPE_DAT;
+    if (strncmp(ext, "shd", 3) == 0) return ERF_RESOURCE_TYPE_SHD;
+    if (strncmp(ext, "xbc", 3) == 0) return ERF_RESOURCE_TYPE_XBC;
+    if (strncmp(ext, "wbm", 3) == 0) return ERF_RESOURCE_TYPE_WBM;
+    if (strncmp(ext, "mtr", 3) == 0) return ERF_RESOURCE_TYPE_MTR;
+    if (strncmp(ext, "ktx", 3) == 0) return ERF_RESOURCE_TYPE_KTX;
+    if (strncmp(ext, "ttf", 3) == 0) return ERF_RESOURCE_TYPE_TTF;
+    if (strncmp(ext, "sql", 3) == 0) return ERF_RESOURCE_TYPE_SQL;
+    if (strncmp(ext, "tml", 3) == 0) return ERF_RESOURCE_TYPE_TML;
+    if (strncmp(ext, "sq3", 3) == 0) return ERF_RESOURCE_TYPE_SQ3;
+    if (strncmp(ext, "ids", 3) == 0) return ERF_RESOURCE_TYPE_IDS;
     if (strncmp(ext, "erf", 3) == 0) return ERF_RESOURCE_TYPE_ERF;
     if (strncmp(ext, "bif", 3) == 0) return ERF_RESOURCE_TYPE_BIF;
     if (strncmp(ext, "key", 3) == 0) return ERF_RESOURCE_TYPE_KEY;
@@ -985,7 +1010,7 @@ static int set_description(char * desc) {
 		description_string = malloc(len +1);
 		strncpy(description_string, desc, len);
 		description_string[len] = 0;
-		printf("Got description \"%s\"\n", description_string);
+		//printf("Got description \"%s\"\n", description_string);
 		return 0;
 	}
 	return -1;
@@ -1010,7 +1035,7 @@ static int set_description_from_file(char * descfile) {
 		}
 		desc[i] = 0;
 
-		printf("Description from file (%d) : \"%s\" \n",sz, desc);
+		//printf("Description from file (%d) : \"%s\" \n",sz, desc);
 		fclose(fptr);
 		return set_description(desc);
 	}
