@@ -54,6 +54,10 @@ NWNFLAGS="-qr"
 NWNCPP="-k"
 # set to -n instead to support nwnee
 #NWNCPP="-n"
+# or this for both
+#NWNCPP="-n -k"
+# EE is now the default - use -N to disable
+#NWNCPP="-N"
 
 ##########
 #These are part of nwntools package so should not need to be changed
