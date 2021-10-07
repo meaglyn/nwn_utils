@@ -14,13 +14,25 @@ else
 	exit 1
 fi
 
+#TODO - these should be elsewhere
 rm -f *.ncs
 rm -f *~
 
 #CFLAGS="-s"
 #CFLAGS="-qr"
 #CFLAGS="-rq -s"
+EXTRA_ARGS="$*"
 
+if [ "${EXTRA_ARGS}x" != "x" ] ; then
+    if [ ${EXTRA_ARGS:0:1} != "-" ] ; then
+	echo ignoring extra args
+	EXTRA_ARGS=""
+    fi
+fi
+
+if [ "${EXTRA_ARGS}x" != "x" ] ; then
+    echo extra_args = "$EXTRA_ARGS"
+fi
 FILES=`ls -1 *.nss 2>/dev/null`
 
 echo using Compiler : $NWNCOMP
@@ -34,8 +46,8 @@ echo -n "Compiling scripts "
 c=0
 for i in *.nss ; 
 do  
-    #echo ${NWNCOMP} -i ${INCDIR} $i
-    ${NWNCOMP} ${NWNFLAGS} ${NWNCPP} -i ${INCDIR} $i
+    #echo ${NWNCOMP} ${NWNFLAGS} ${NWNCPP} ${EXTRA_ARGS} -i ${INCDIR}  $i
+    ${NWNCOMP} ${NWNFLAGS} ${NWNCPP} ${EXTRA_ARGS} -i ${INCDIR} $i
     if [ ! $? -eq 0 ] ; then 
 	exit 1
     fi
