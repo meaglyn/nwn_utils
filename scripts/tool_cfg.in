@@ -1,3 +1,4 @@
+#!/bin/sh
 #
 # Configuration file for NWN Utils
 #
@@ -22,10 +23,10 @@
 
 
 TOOLDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-echo TOOLDIR = ${TOOLDIR}
+#echo TOOLDIR = ${TOOLDIR}
 
 ROOTDIR="$( cd "$( dirname "${TOOLDIR}" )" && pwd )"
-echo ROOTDIR = ${ROOTDIR}
+#echo ROOTDIR = ${ROOTDIR}
 
 #If you do not install these other utilities in this directory then you need to 
 #link then here or update these paths to be corrent. 
@@ -39,24 +40,29 @@ ERF=${TOOLDIR}/erf
 NWNTLKCOMP=${TOOLDIR}/nwntlkcomp
 
 #Path to script compiler 
-NWNCOMP=${TOOLDIR}/nwnnsscomp
+#NWNCOMP=${TOOLDIR}/nwnnsscomp
+NWNCOMP=${TOOLDIR}/nwnsc
  
 # path to directory of NWN include files. 
-INCDIR=${ROOTDIR}/include
+#INCDIR=${ROOTDIR}/include
+#nwnsc needs the files under the given dir
+#INCDIR=${ROOTDIR}/include/base_ee_cpp
+INCDIR="${ROOTDIR}/include/eecpp_scripts;${ROOTDIR}/include/base_scripts"
 
 # flags for nwnnsscomp
-NWNFLAGS="-qr"
+#NWNFLAGS="-qr -o"
 # To add symbol checking
 #NWNFLAGS="-qrs"
+# nwnsc flags
+NWNFLAGS="-q -o"
  
+#none of these are for nwnsc
 #support for cpp include directory - only use this if you plan to run any modules with CPP1.71
 #NWNCPP=
-NWNCPP="-k"
-# set to -n instead to support nwnee
-#NWNCPP="-n"
-# or this for both
+#NWNCPP="-k"
+#set to -n instead to support nwnee
 #NWNCPP="-n -k"
-# EE is now the default - use -N to disable
+#ee is the default use -N to turn it off
 #NWNCPP="-N"
 
 ##########

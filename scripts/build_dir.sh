@@ -4,7 +4,7 @@ if [ "${NWNTOOLS}x" == "x" ] ; then
 	#NWNTOOLS="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd -P )"  # does not work if file itself is a link
 	#NWNTOOLS=`dirname $(realpath  $0)`   # this one works
 	NWNTOOLS=`dirname $(readlink -f $0)`
-	echo Environement variable NWNTOOLS unset using ${NWNTOOLS}
+	#echo Environement variable NWNTOOLS unset using ${NWNTOOLS}
 fi
 
 if [ -f ${NWNTOOLS}/tool_cfg ] ; then
@@ -17,6 +17,9 @@ fi
 #TODO - these should be elsewhere
 rm -f *.ncs
 rm -f *~
+
+# 0 for off, 1 for each file name, 2 for each full command line
+VERBOSE=0
 
 #CFLAGS="-s"
 #CFLAGS="-qr"
@@ -42,19 +45,28 @@ if [ "${FILES}x" == "x" ] ; then
     exit 0
 fi
 
-echo -n "Compiling scripts "
+if [ $VERBOSE -eq 0 ] ; then
+    echo -n "Compiling scripts "
+fi
 c=0
 for i in *.nss ; 
-do  
-    #echo ${NWNCOMP} ${NWNFLAGS} ${NWNCPP} ${EXTRA_ARGS} -i ${INCDIR}  $i
+do
+    if [ $VERBOSE -eq 1 ] ; then
+	echo compiling $i
+    fi
+    if [ $VERBOSE -eq 2 ] ; then
+	echo ${NWNCOMP} ${NWNFLAGS} ${NWNCPP} ${EXTRA_ARGS} -i ${INCDIR}  $i
+    fi
     ${NWNCOMP} ${NWNFLAGS} ${NWNCPP} ${EXTRA_ARGS} -i ${INCDIR} $i
     if [ ! $? -eq 0 ] ; then 
 	exit 1
     fi
-    c=$(($c + 1))
-    n=$(($c%5))
-    if [ $n -eq 0 ] ; then 
-	echo -n "."
+    if [ $VERBOSE -eq 0 ] ; then
+	c=$(($c + 1))
+	n=$(($c%5))
+	if [ $n -eq 0 ] ; then 
+	    echo -n "."
+	fi
     fi
 done
 echo 
