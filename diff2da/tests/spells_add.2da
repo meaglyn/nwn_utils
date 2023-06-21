@@ -1,0 +1,12 @@
+2DA V2.0
+
+     TargetShape    TargetSizeX    TargetSizeY    TargetFlags
+0    sphere         5              ****           3          
+1    ****           ****           ****           ****       
+2    ****           ****           ****           ****       
+3    ****           ****           ****           ****       
+4    ****           ****           ****           ****       
+5    rectangle      1              10             3          
+6    sphere         10             ****           4          
+7    ****           ****           ****           ****       
+8    ****           ****           ****           ****       

@@ -706,8 +706,65 @@ sub diff2da {
 
 }
 
+# add colums from file 2 to end of file 1. Extend rows that don't have values ( i.e. file 2 shorter than file 1)
+# ignore rows if file2 has more rows.
+sub merge_files {
+     my $href = shift; 
+     my $rowref = $href->{ 'rows' };  
+     my $numcols = $href->{ 'numcols' };
+     my $numrows = $href->{ 'numrows' };
+     my $headref = $href->{ 'headers' };
+     my $fname1  = $href->{ 'fname' };
+     
+     my $href2 = shift; 
+     my $rowref2 = $href2->{ 'rows' };  
+     my $numcols2 = $href2->{ 'numcols' };
+     my $numrows2 = $href2->{ 'numrows' };
+     my $headref2 = $href2->{ 'headers' };
+     my $fname2  = $href2->{ 'fname' };
+     
+     if (!$quiet) {
+	 print STDERR "2da file $fname1 has $numcols columns (excluding row number) and  $numrows rows\n";
+	 print STDERR "adding $numcols2 columns (excluding row number) from $fname2 with $numrows2 rows\n";
+	 if ($numrows > $numrows2) {
+	     print STDERR "extra rows will be padded.\n";
+	 }
+	 if ($numrows2 > $numrows) {
+	     print STDERR "extra rows will be ignored.\n";
+	 }
+	 
+     }
+     # todo - error if coulmn name already exists in  headref
+ 
+     #print STDERR "starting with $#{$headref} cols\n";
+     
+     for my $i (1 .. $numcols2) {
+	 ${$headref}[$numcols  + $i] = ${$headref2}[$i];
+	 if (!$quiet) {print STDERR "add column \"${$headref2}[$i]\" \n";}
+     }
+     #$headref = $headref + $headref2;
+
+     #print STDERR "now with $#{$headref} cols\n";
+
+     for my $i (0 .. $numrows) {
+	  my $row1 = ${$rowref}[$i];
+
+	  my $row2 =  ${$rowref2}[$i];
+	  if (defined $row2) {
+	      for my $j (1 .. $numcols2) {
+		  ${$row1}[$numcols  + $j] = ${$row2}[$j];
+	      }
+	  } else {
+	      for my $j (1 .. $numcols2) {
+		  ${$row1}[$numcols  + $j] = "****";
+	      }
+	  }
+     }
+	
+}
+
 sub usage {
-    print STDERR "Usage : $0 [-afhHpqrSuv] [-n start_line] [-o outfile] [-lL <list>] [ -c <list>] file1 [file2]\n";
+    print STDERR "Usage : $0 [-afhHmpqrSuv] [-n start_line] [-o outfile] [-lL <list>] [ -c <list>] file1 [file2]\n";
     print STDERR "\t a: report all errors when validating\n"; 
     #print STDERR "\t d: enable debug messages (not for the faint of heart)\n"; 
     print STDERR "\t f: try to fix row and column errors, implies -ar\n"; 
@@ -718,6 +775,8 @@ sub usage {
     print STDERR "\t r: report file1's row number and column errors\n";
     print STDERR "\t S: print in semicolon separated format (useless without -p) \n";
     print STDERR "\t u: diff file1 and file2. Files should be valid 2da files with no errors.\n";
+    print STDERR "\t m: merge (add) columns from file2 to the right end of file1. Extra rows in file1 padded, extras in file2 ignored.\n";
+    print STDERR "\t Note: -lLc are ignored. Files should be valid 2da files with no errors.\n";
     print STDERR "\t v: verbose output. Longer error messages and column differences\n";
     print STDERR "\t n <start_line>: use given starting line number for validation. Useful when operating on a subset of a 2da\n";
     print STDERR "\t o <outfile>: Write printed 2da to outfile. Must not be the same as file1 or file2\n";
@@ -735,7 +794,7 @@ sub usage {
 
 # declare the perl command line flags/options we want to allow
 my %options=();
-if (! getopts("ac:C:dfhHl:L:n:o:pqrSuv", \%options)) {
+if (! getopts("ac:C:dfhHl:L:mn:o:pqrSuv", \%options)) {
     usage;
     exit 1;
 }
@@ -762,6 +821,7 @@ my $continue = 0;
 my $fixerrors = 0;
 my $outfile = "";
 my $diff = 0;
+my $merge = 0;
 
 # print the file
 if (defined $options{p}) {
@@ -850,6 +910,21 @@ if (defined $options{u}) {
     $diff = 1;
 }
 
+if (defined $options{m}) {
+    if (!defined $ARGV[1]) {
+	print STDERR "No second file for merge\n";
+	usage;
+	exit 1;
+    }
+    $cmpfile = $ARGV[1];
+    $merge = 1;
+}
+
+if ($merge && $diff) {
+    print STDERR "-m and -u are mutually exclusive.\n";
+    exit 1;
+}
+
 
 if (!defined $ARGV[0]) {
     usage;
@@ -880,6 +955,22 @@ if ($diff) {
     exit 0;
 }
 
+if ($merge) {
+    if (!$quiet) {print STDERR "Merging $cmpfile cols onto $infile\n";}
+
+    my  %file2 =  open2dafile($cmpfile);
+    merge_files (\%file1, \%file2);
+
+    # print the file  
+    if ($print == 1) {
+	if ($print_delim == 1) {
+	    printfile_delim(\%file1);
+	} else {
+	    printfile_spaces(\%file1);
+	}
+    } 
+    exit 0;
+}
 
 if (!$quiet) {print STDERR "2da file $infile has $file1{ 'numcols' } columns (excluding row number) and  $file1{ 'numrows' } rows\n";}
 
